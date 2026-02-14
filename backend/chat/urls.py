@@ -1,5 +1,8 @@
-from django.urls import path
+from rest_framework.routers import DefaultRouter
 
-urlpatterns = [
-    # Chat routes will be added here.
-]
+from chat.views import ChatSessionViewSet
+
+router = DefaultRouter()
+router.register(r"sessions", ChatSessionViewSet, basename="chat-sessions")
+
+urlpatterns = router.urls
