@@ -1,12 +1,8 @@
 from urllib.parse import parse_qs
 
 from channels.db import database_sync_to_async
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AnonymousUser
 from django.conf import settings
-from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
-from rest_framework_simplejwt.settings import api_settings
-from rest_framework_simplejwt.tokens import UntypedToken
+from django.contrib.auth import get_user_model
 from jwt import decode as jwt_decode
 
 
@@ -14,8 +10,12 @@ from jwt import decode as jwt_decode
 def get_user_for_id(user_id):
     user_model = get_user_model()
     try:
+        from rest_framework_simplejwt.settings import api_settings
+
         return user_model.objects.get(**{api_settings.USER_ID_FIELD: user_id})
     except user_model.DoesNotExist:
+        from django.contrib.auth.models import AnonymousUser
+
         return AnonymousUser()
 
 
@@ -33,6 +33,8 @@ class JwtAuthMiddlewareInstance:
         self.inner = inner
 
     async def __call__(self, receive, send):
+        from django.contrib.auth.models import AnonymousUser
+
         self.scope["user"] = AnonymousUser()
         token = self._get_token(self.scope)
         if token:
@@ -56,21 +58,34 @@ class JwtAuthMiddlewareInstance:
 
     async def _get_user_from_token(self, token):
         try:
+            from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+            from rest_framework_simplejwt.tokens import UntypedToken
+
             UntypedToken(token)
         except (InvalidToken, TokenError):
+            from django.contrib.auth.models import AnonymousUser
+
             return AnonymousUser()
 
         try:
+            from rest_framework_simplejwt.settings import api_settings
+
             payload = jwt_decode(
                 token,
                 settings.SECRET_KEY,
                 algorithms=[api_settings.ALGORITHM],
             )
         except Exception:
+            from django.contrib.auth.models import AnonymousUser
+
             return AnonymousUser()
+
+        from rest_framework_simplejwt.settings import api_settings
 
         user_id = payload.get(api_settings.USER_ID_CLAIM)
         if not user_id:
+            from django.contrib.auth.models import AnonymousUser
+
             return AnonymousUser()
 
         return await get_user_for_id(user_id)

@@ -5,10 +5,10 @@ from collections import deque
 from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
+from django.apps import apps
 from django.conf import settings
 from openai import AsyncOpenAI
 
-from chat.models import ChatSession, Message
 from rag.prompts import SYSTEM_PROMPT
 from rag.retrieval import retrieve_context
 
@@ -67,7 +67,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         session_id = payload.get("session_id")
         session = await self._get_or_create_session(session_id)
-        user_message = await self._create_message(session, Message.ROLE_USER, message)
+        user_message = await self._create_message(session, "user", message)
         history = await self._get_recent_messages(session, exclude_id=user_message.id)
 
         context_chunks = await sync_to_async(retrieve_context)(message)
@@ -131,11 +131,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return
 
         if assistant_text:
-            await self._create_message(session, Message.ROLE_ASSISTANT, assistant_text)
+            await self._create_message(session, "assistant", assistant_text)
             await self.send(text_data=json.dumps({"type": "done"}))
 
     @database_sync_to_async
     def _get_or_create_session(self, session_id):
+        ChatSession = apps.get_model("chat", "ChatSession")
         if session_id:
             try:
                 return ChatSession.objects.get(id=session_id, user=self.scope["user"])
@@ -145,10 +146,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def _create_message(self, session, role, content):
+        Message = apps.get_model("chat", "Message")
         return Message.objects.create(session=session, role=role, content=content)
 
     @database_sync_to_async
     def _get_recent_messages(self, session, exclude_id=None, limit=5):
+        Message = apps.get_model("chat", "Message")
         queryset = Message.objects.filter(session=session)
         if exclude_id:
             queryset = queryset.exclude(id=exclude_id)

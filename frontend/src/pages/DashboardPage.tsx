@@ -1,15 +1,35 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import ChatWidget from '../components/ChatWidget'
+import { useAuth } from '../state/AuthContext'
 
 export default function DashboardPage() {
+  const navigate = useNavigate()
+  const { logout } = useAuth()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
+  }
+
   return (
     <div className="relative overflow-hidden">
       <div className="mx-auto max-w-6xl px-6 py-16">
-        <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="flex items-center justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-emerald-300">CSEC AI</p>
-            <h1 className="mt-6 text-5xl font-semibold leading-tight text-white">
+            <p className="mt-2 text-sm text-slate-400">Secure AI support for your team</p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="rounded-full border border-slate-700 px-4 py-2 text-xs font-semibold text-slate-200"
+          >
+            Log out
+          </button>
+        </div>
+        <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+          <div>
+            <h1 className="mt-8 text-5xl font-semibold leading-tight text-white">
               A living knowledge base for your product, powered by real-time AI.
             </h1>
             <p className="mt-6 text-base text-slate-300">
