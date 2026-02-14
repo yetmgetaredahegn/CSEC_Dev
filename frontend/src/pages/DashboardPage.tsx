@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
 
+import ChatWidget from '../components/ChatWidget'
+
 export default function DashboardPage() {
   return (
     <div className="relative overflow-hidden">
@@ -49,6 +51,7 @@ export default function DashboardPage() {
         </div>
       </div>
       <div className="pointer-events-none absolute -top-48 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-emerald-400/20 blur-3xl" />
+      <ChatWidget />
     </div>
   )
 }

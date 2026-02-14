@@ -64,11 +64,10 @@ export default function ChatHistoryPage() {
                 <button
                   key={session.id}
                   onClick={() => handleSelect(session.id)}
-                  className={`w-full rounded-2xl border px-4 py-3 text-left text-sm transition ${
-                    selected?.id === session.id
+                  className={`w-full rounded-2xl border px-4 py-3 text-left text-sm transition ${selected?.id === session.id
                       ? 'border-emerald-400/50 bg-emerald-400/10 text-emerald-200'
                       : 'border-slate-800 bg-slate-950/60 text-slate-300'
-                  }`}
+                    }`}
                 >
                   <p className="font-semibold">Session #{session.id}</p>
                   <p className="mt-1 text-xs text-slate-500">
@@ -92,11 +91,10 @@ export default function ChatHistoryPage() {
               selected.messages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm ${
-                    msg.role === 'user'
+                  className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm ${msg.role === 'user'
                       ? 'ml-auto bg-emerald-400 text-slate-900'
                       : 'bg-slate-900/80 text-slate-100'
-                  }`}
+                    }`}
                 >
                   {msg.content}
                 </div>
