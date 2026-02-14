@@ -1,4 +1,6 @@
 import json
+import time
+from collections import deque
 
 from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
@@ -12,11 +14,15 @@ from rag.retrieval import retrieve_context
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
+    RATE_LIMIT_WINDOW_SECONDS = 30
+    RATE_LIMIT_MAX_MESSAGES = 6
+
     async def connect(self):
         if self.scope["user"].is_anonymous:
             await self.close(code=4401)
             return
 
+        self._message_times = deque()
         await self.accept()
         await self.send(text_data=json.dumps({"type": "status", "message": "connected"}))
 
@@ -29,6 +35,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
             payload = json.loads(text_data)
         except json.JSONDecodeError:
             await self.send(text_data=json.dumps({"type": "error", "error": "invalid_json"}))
+            return
+
+        if self._is_rate_limited():
+            await self.send(
+                text_data=json.dumps(
+                    {
+                        "type": "error",
+                        "error": "rate_limited",
+                        "retry_after": self.RATE_LIMIT_WINDOW_SECONDS,
+                    }
+                )
+            )
             return
 
         message = str(payload.get("message", "")).strip()
@@ -135,3 +153,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if exclude_id:
             queryset = queryset.exclude(id=exclude_id)
         return list(queryset.order_by("-timestamp")[:limit][::-1])
+
+    def _is_rate_limited(self):
+        now = time.monotonic()
+        window_start = now - self.RATE_LIMIT_WINDOW_SECONDS
+        while self._message_times and self._message_times[0] < window_start:
+            self._message_times.popleft()
+
+        if len(self._message_times) >= self.RATE_LIMIT_MAX_MESSAGES:
+            return True
+
+        self._message_times.append(now)
+        return False
