@@ -1,6 +1,7 @@
 from urllib.parse import parse_qs
 
 from channels.db import database_sync_to_async
+from channels.middleware import BaseMiddleware
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from jwt import decode as jwt_decode
@@ -19,28 +20,17 @@ def get_user_for_id(user_id):
         return AnonymousUser()
 
 
-class JwtAuthMiddleware:
-    def __init__(self, inner):
-        self.inner = inner
-
-    def __call__(self, scope):
-        return JwtAuthMiddlewareInstance(scope, self.inner)
-
-
-class JwtAuthMiddlewareInstance:
-    def __init__(self, scope, inner):
-        self.scope = dict(scope)
-        self.inner = inner
-
-    async def __call__(self, receive, send):
+class JwtAuthMiddleware(BaseMiddleware):
+    async def __call__(self, scope, receive, send):
+        scope = dict(scope)
         from django.contrib.auth.models import AnonymousUser
 
-        self.scope["user"] = AnonymousUser()
-        token = self._get_token(self.scope)
+        scope["user"] = AnonymousUser()
+        token = self._get_token(scope)
         if token:
             user = await self._get_user_from_token(token)
-            self.scope["user"] = user
-        return await self.inner(self.scope, receive, send)
+            scope["user"] = user
+        return await super().__call__(scope, receive, send)
 
     def _get_token(self, scope):
         query_string = scope.get("query_string", b"").decode("utf-8")

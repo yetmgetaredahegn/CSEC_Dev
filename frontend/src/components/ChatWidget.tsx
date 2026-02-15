@@ -33,7 +33,11 @@ export default function ChatWidget() {
             return
         }
 
-        if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+        if (
+            socketRef.current &&
+            (socketRef.current.readyState === WebSocket.OPEN ||
+                socketRef.current.readyState === WebSocket.CONNECTING)
+        ) {
             return
         }
 
@@ -47,6 +51,7 @@ export default function ChatWidget() {
         socket.onclose = () => {
             setStatus('disconnected')
             setIsStreaming(false)
+            socketRef.current = null
         }
 
         socket.onerror = () => {

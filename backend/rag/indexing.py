@@ -1,5 +1,5 @@
 from django.conf import settings
-from llama_index.core import Settings, VectorStoreIndex
+from llama_index.core import Document, Settings, VectorStoreIndex
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.embeddings.openai import OpenAIEmbedding
 
@@ -16,13 +16,12 @@ def ingest_text(text, metadata=None, chunk_size=900, chunk_overlap=120):
     )
 
     splitter = SentenceSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-    nodes = splitter.get_nodes_from_documents([
-        {
-            "text": text,
-            "metadata": metadata or {},
-        }
-    ])
+    document = Document(text=text, metadata=metadata or {})
 
     storage_context = get_storage_context()
-    VectorStoreIndex.from_nodes(nodes, storage_context=storage_context)
+    VectorStoreIndex.from_documents(
+        [document],
+        storage_context=storage_context,
+        node_parser=splitter,
+    )
     return True
