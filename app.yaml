@@ -12,40 +12,40 @@ services:
     run_command: gunicorn core.asgi:application -k uvicorn.workers.UvicornWorker -w 4 -b 0.0.0.0:8000
     envs:
       - key: DJANGO_DEBUG
-        value: "False"
+        value: 'False'
       - key: DJANGO_SECRET_KEY
-        value: "change-me"
+        value: 'change-me'
         type: SECRET
       - key: DJANGO_ALLOWED_HOSTS
-        value: "your-backend-domain"
+        value: 'your-backend-domain'
       - key: CORS_ALLOWED_ORIGINS
-        value: "https://your-frontend-domain"
+        value: 'https://your-frontend-domain'
       - key: POSTGRES_DB
-        value: "csec_dev"
+        value: 'csec_dev'
       - key: POSTGRES_USER
-        value: "csec_user"
+        value: 'csec_user'
       - key: POSTGRES_PASSWORD
-        value: "change-me"
+        value: 'change-me'
         type: SECRET
       - key: POSTGRES_HOST
-        value: "db-host"
+        value: 'db-host'
       - key: POSTGRES_PORT
-        value: "5432"
+        value: '5432'
       - key: REDIS_URL
-        value: "redis://your-redis-host:6379/0"
+        value: 'redis://your-redis-host:6379/0'
       - key: CELERY_BROKER_URL
-        value: "redis://your-redis-host:6379/0"
+        value: 'redis://your-redis-host:6379/0'
       - key: CELERY_RESULT_BACKEND
-        value: "redis://your-redis-host:6379/0"
+        value: 'redis://your-redis-host:6379/0'
       - key: OPENAI_API_KEY
-        value: "change-me"
+        value: 'change-me'
         type: SECRET
       - key: OPENAI_CHAT_MODEL
-        value: "gpt-4o-mini"
+        value: 'gpt-4o-mini'
       - key: OPENAI_EMBED_MODEL
-        value: "text-embedding-3-large"
+        value: 'text-embedding-3-large'
       - key: CHROMA_PERSIST_DIR
-        value: "/data/vector_store"
+        value: '/data/vector_store'
     health_check:
       http_path: /api/ping/
   - name: backend-worker
@@ -59,37 +59,37 @@ services:
     run_command: celery -A core worker -l info
     envs:
       - key: DJANGO_DEBUG
-        value: "False"
+        value: 'False'
       - key: DJANGO_SECRET_KEY
-        value: "change-me"
+        value: 'change-me'
         type: SECRET
       - key: DJANGO_ALLOWED_HOSTS
-        value: "your-backend-domain"
+        value: 'your-backend-domain'
       - key: CORS_ALLOWED_ORIGINS
-        value: "https://your-frontend-domain"
+        value: 'https://your-frontend-domain'
       - key: POSTGRES_DB
-        value: "csec_dev"
+        value: 'csec_dev'
       - key: POSTGRES_USER
-        value: "csec_user"
+        value: 'csec_user'
       - key: POSTGRES_PASSWORD
-        value: "change-me"
+        value: 'change-me'
         type: SECRET
       - key: POSTGRES_HOST
-        value: "db-host"
+        value: 'db-host'
       - key: POSTGRES_PORT
-        value: "5432"
+        value: '5432'
       - key: REDIS_URL
-        value: "redis://your-redis-host:6379/0"
+        value: 'redis://your-redis-host:6379/0'
       - key: CELERY_BROKER_URL
-        value: "redis://your-redis-host:6379/0"
+        value: 'redis://your-redis-host:6379/0'
       - key: CELERY_RESULT_BACKEND
-        value: "redis://your-redis-host:6379/0"
+        value: 'redis://your-redis-host:6379/0'
       - key: OPENAI_API_KEY
-        value: "change-me"
+        value: 'change-me'
         type: SECRET
       - key: OPENAI_CHAT_MODEL
-        value: "gpt-4o-mini"
+        value: 'gpt-4o-mini'
       - key: OPENAI_EMBED_MODEL
-        value: "text-embedding-3-large"
+        value: 'text-embedding-3-large'
       - key: CHROMA_PERSIST_DIR
-        value: "/data/vector_store"
+        value: '/data/vector_store'
